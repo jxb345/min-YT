@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal YouTube Search</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      background-color: black;
+    }
+
+    h3 {
+      color: white;
+    }
+    
+    #search-container {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 70%;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result-item {
+      margin: 10px 0;
+    }
+    .result-item a {
+      color: #065fd4;
+      text-decoration: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .result-item a:hover {
+      text-decoration: underline;
+    }
+    #player-container {
+      margin-top: 20px;
+    }
+    /* New utility class to easily hide and show elements */
+    .hidden {
+      display: none !important;
+    }
+    #backButton {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h3>Search YouTube</h3>
+  <div id="search-container">
+    <input type="text" id="searchInput" placeholder="Search a topic..." onkeydown="if(event.key === 'Enter') searchYouTube()">
+    <button onclick="searchYouTube()">Search</button>
+    <button onclick="clearSearch()">Clear</button>
+  </div>
+
+  <!-- The new Back Button, hidden by default -->
+  <button id="backButton" class="hidden" onclick="showResults()">&larr; Back to Results</button>
+
+  <div id="results"></div>
+  <div id="player-container"></div>
+
+  <script>
+    // Replace this with your actual YouTube Data API v3 Key
+    const API_KEY = 'AIzaSyA8qK8Xnh5ZKQ4A0_lcPD5GypdkaCsDg1Y';
+
+    async function searchYouTube() {
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = 'Searching...';
+
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+      
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+          resultsDiv.innerHTML = `<p style="color:red;">Error: ${data.error.message}</p>`;
+          return;
+        }
+
+        resultsDiv.innerHTML = '';
+        data.items.forEach(item => {
+          const videoId = item.id.videoId;
+          const title = item.snippet.title;
+
+          const div = document.createElement('div');
+          div.className = 'result-item';
+          div.innerHTML = `<a onclick="playVideo('${videoId}')">${title}</a>`;
+          resultsDiv.appendChild(div);
+        });
+      } catch (error) {
+        resultsDiv.innerHTML = 'Failed to fetch results.';
+      }
+    }
+
+    function playVideo(videoId) {
+      // 1. Hide the search bar and results list
+      document.getElementById('search-container').classList.add('hidden');
+      document.getElementById('results').classList.add('hidden');
+      
+      // 2. Show the Back button
+      document.getElementById('backButton').classList.remove('hidden');
+
+      // 3. Load the video player
+      const playerContainer = document.getElementById('player-container');
+      playerContainer.innerHTML = `
+        <iframe width="100%" height="450" 
+          src="https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+
+    // New function to handle the Back button logic
+    function showResults() {
+      // 1. Destroy the iframe to stop the video and audio from playing
+      document.getElementById('player-container').innerHTML = '';
+      
+      // 2. Hide the Back button
+      document.getElementById('backButton').classList.add('hidden');
+      
+      // 3. Reveal the search bar and the previous results
+      document.getElementById('search-container').classList.remove('hidden');
+      document.getElementById('results').classList.remove('hidden');
+    }
+
+    function clearSearch() {
+      // 1. Empty the text input
+      const searchInput = document.getElementById('searchInput');
+      searchInput.value = '';
+      
+      // 2. Clear out the old search results from the screen
+      document.getElementById('results').innerHTML = '';
+      
+      // 3. Put the blinking cursor back inside the input box automatically
+      searchInput.focus();
+    }
+
+  </script>
+</body>
+</html>
