@@ -28,6 +28,7 @@
     }
     button {
       padding: 8px 16px;
+      border-radius: 6px;
       font-size: 16px;
       cursor: pointer;
     }
@@ -60,12 +61,12 @@
   <h3>Search YouTube</h3>
   <div id="search-container">
     <input type="text" id="searchInput" onkeydown="if(event.key === 'Enter') searchYouTube()">
-    <button onclick="searchYouTube()">Search</button>
-    <button onclick="clearSearch()">Clear</button>
+    <button onclick="searchYouTube()">SEARCH</button>
+    <button onclick="clearSearch()">CLEAR</button>
   </div>
 
   <!-- The new Back Button, hidden by default -->
-  <button id="backButton" class="hidden" onclick="showResults()">&larr; Back to Results</button>
+  <button id="backButton" class="hidden" onclick="showResults()">&larr; BACK TO RESULTS</button>
 
   <div id="results"></div>
   <div id="player-container"></div>
